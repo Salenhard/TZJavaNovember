@@ -28,11 +28,6 @@ public class CommentControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-//    @BeforeEach
-//    public void setup() {
-//
-//    }
-
     @Test
     public void getCommentTaskOkTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/tasks/1/comments/1")
@@ -43,7 +38,7 @@ public class CommentControllerTest {
     }
 
     @Test
-    public void getAll() throws Exception {
+    public void getAllCommentOkTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/tasks/1/comments")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("user")))
@@ -69,7 +64,7 @@ public class CommentControllerTest {
 
     @Test
     public void deleteNoContentTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/tasks/0/comments/1", "0", "0")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/tasks/1/comments/1")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("user")))
                 .andExpect(status().isNoContent())

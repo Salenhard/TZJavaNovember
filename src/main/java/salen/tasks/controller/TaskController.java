@@ -13,6 +13,7 @@ import salen.tasks.exception.TaskAlreadyExistsException;
 import salen.tasks.exception.TaskNotFoundException;
 import salen.tasks.service.TaskService;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -33,12 +34,12 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody @Valid TaskDto dto) {
+    public ResponseEntity<?> save(@RequestBody @Valid TaskDto dto, Principal principal) {
         if (dto.getId() != null && service.get(dto.getId()).isPresent())
             throw new TaskAlreadyExistsException(dto.getId());
-        Long userId = 1L;
+        String loggedUserEmail = principal.getName();
         return ResponseEntity.ok()
-                .body(mapper.toDto(service.save(mapper.toEntity(dto), userId, dto.getExecutorId())));
+                .body(mapper.toDto(service.save(mapper.toEntity(dto), loggedUserEmail, dto.getExecutorId())));
     }
 
     @DeleteMapping("/{id}")
@@ -48,7 +49,7 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody @Valid TaskDto dto) {
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody @Valid TaskDto dto, Principal principal) {
         Task updatedTask = service.get(id).map(newTask ->
         {
             newTask.setDescription(dto.getDescription());
@@ -57,8 +58,8 @@ public class TaskController {
             newTask.setTitle(dto.getTitle());
             return newTask;
         }).orElseThrow(() -> new TaskNotFoundException(id));
-        Long userId = 1L;
+        String loggedUserEmail = principal.getName();
         return ResponseEntity.ok()
-                .body(mapper.toDto(service.save(updatedTask, userId, dto.getExecutorId())));
+                .body(mapper.toDto(service.save(updatedTask, loggedUserEmail, dto.getExecutorId())));
     }
 }

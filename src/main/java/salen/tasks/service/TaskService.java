@@ -38,8 +38,8 @@ public class TaskService {
 
     @CachePut(value = "tasks", key = "#task.id")
     @Transactional
-    public Task save(Task task, Long authorId, Long executorId) {
-        User author = service.get(authorId).orElseThrow(() -> new UserNotFoundException(authorId));
+    public Task save(Task task, String authorEmail, Long executorId) {
+        User author = service.getByEmail(authorEmail).orElseThrow(() -> new UserNotFoundException(authorEmail));
         User executor = service.get(executorId).orElseThrow(() -> new UserNotFoundException(executorId));
         task.setExecutor(executor);
         task.setAuthor(author);

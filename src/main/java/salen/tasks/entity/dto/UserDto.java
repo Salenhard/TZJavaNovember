@@ -17,7 +17,7 @@ public class UserDto {
     private String email;
 
     @NotBlank(message = "password is mandatory")
-    @Size(min = 8, message = "password should 8 or more chars")
+    @Size(min = 8, message = "password should be 8 or more chars")
     private String password;
 
     @NotNull(message = "role is mandatory")

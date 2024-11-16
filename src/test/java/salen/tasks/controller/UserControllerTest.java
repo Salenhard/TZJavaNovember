@@ -1,6 +1,5 @@
 package salen.tasks.controller;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,13 +24,8 @@ public class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @BeforeEach
-    public void setup() {
-
-    }
-
     @Test
-    public void get() throws Exception {
+    public void getUserOkTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/users/1")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("user")))
@@ -40,7 +34,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void getAll() throws Exception {
+    public void getAllUsersOkTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/users")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("user")))
@@ -49,13 +43,12 @@ public class UserControllerTest {
     }
 
     @Test
-    public void save() throws Exception {
+    public void saveUserOkTest() throws Exception {
         String dto = """
                 {
-                    "id": 0,
-                    "email": "",
-                    "password": "",
-                    "roles": []
+                    "email": "test@Test.ru",
+                    "password": "testPass",
+                    "roles": ["USER"]
                 }""";
 
         mockMvc.perform(post("/api/v1/users")
@@ -68,25 +61,24 @@ public class UserControllerTest {
     }
 
     @Test
-    public void delete() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/users/{0}", "0")
+    public void deleteUserNoContentTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/users/1")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("user")))
-                .andExpect(status().isOk())
+                .andExpect(status().isNoContent())
                 .andDo(print());
     }
 
     @Test
-    public void update() throws Exception {
+    public void updateUserOkTest() throws Exception {
         String dto = """
                 {
-                    "id": 0,
-                    "email": "",
-                    "password": "",
-                    "roles": []
+                    "email": "example@example.com",
+                    "password": "1234test",
+                    "roles": ["USER"]
                 }""";
 
-        mockMvc.perform(put("/api/v1/users/{0}", "0")
+        mockMvc.perform(put("/api/v1/users/1")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("user"))
                         .content(dto)

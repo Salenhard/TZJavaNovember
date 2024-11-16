@@ -25,11 +25,6 @@ public class TaskControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @BeforeEach
-    public void setup() {
-
-    }
-
     @Test
     public void getTaskIsOkTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/tasks/1")

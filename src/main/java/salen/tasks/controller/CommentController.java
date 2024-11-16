@@ -14,6 +14,7 @@ import salen.tasks.exception.CommentAlreadyExistsException;
 import salen.tasks.exception.CommentNotFoundException;
 import salen.tasks.service.CommentService;
 
+import java.security.Principal;
 import java.util.Optional;
 
 @RestController
@@ -35,28 +36,28 @@ public class CommentController {
     }
 
     @PostMapping
-    public ResponseEntity<?> save(@PathVariable Long taskId, @RequestBody @Valid CommentDto dto) {
+    public ResponseEntity<?> save(@PathVariable Long taskId, @RequestBody @Valid CommentDto dto, Principal principal) {
         if (dto.getId() != null && service.get(dto.getId(), taskId).isPresent())
             throw new CommentAlreadyExistsException(dto.getId());
-        Long loggedUserId = 1L; //todo get from session
-        return ResponseEntity.ok().body(mapper.toDto(service.save(mapper.toEntity(dto), loggedUserId, taskId)));
+        String loggedUserEmail = principal.getName();
+        return ResponseEntity.ok().body(mapper.toDto(service.save(mapper.toEntity(dto), loggedUserEmail, taskId)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long taskId, @PathVariable Long id) {
-        Long loggedUserId = 1L; //todo get from session
-        service.delete(id, loggedUserId, taskId);
+    public ResponseEntity<?> delete(@PathVariable Long taskId, @PathVariable Long id, Principal principal) {
+        String loggedUserEmail = principal.getName();
+        service.delete(id, loggedUserEmail, taskId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
-    public CommentDto update(@PathVariable Long taskId, @PathVariable Long id, @RequestBody @Valid CommentDto dto) {
+    public CommentDto update(@PathVariable Long taskId, @PathVariable Long id, @RequestBody @Valid CommentDto dto, Principal principal) {
         Comment updatedComment = service.get(id, taskId).map((comment) -> {
                     comment.setValue(dto.getValue());
                     return comment;
                 }
         ).orElseThrow(() -> new CommentNotFoundException(id));
-        Long userId = 1L;
-        return mapper.toDto(service.save(updatedComment, userId, taskId));
+        String loggedUserEmail = principal.getName();
+        return mapper.toDto(service.save(updatedComment, loggedUserEmail, taskId));
     }
 }

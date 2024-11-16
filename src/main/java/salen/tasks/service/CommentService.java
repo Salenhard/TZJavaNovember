@@ -33,13 +33,13 @@ public class CommentService {
     }
 
     @CacheEvict(value = "comments", key = "#id")
-    public void delete(Long id, Long authorId, Long taskId) {
-        repository.deleteByIdAndAuthor_idAndTask_Id(id, authorId, taskId);
+    public void delete(Long id, String authorEmail, Long taskId) {
+        repository.deleteByIdAndAuthor_EmailAndTask_Id(id, authorEmail, taskId);
     }
 
     @CachePut(value = "comments", key = "#comment.id")
-    public Comment save(Comment comment, Long authorId, Long taskId) {
-        User author = userService.get(authorId).orElseThrow(() -> new UserNotFoundException(authorId));
+    public Comment save(Comment comment, String authorEmail, Long taskId) {
+        User author = userService.getByEmail(authorEmail).orElseThrow(() -> new UserNotFoundException(authorEmail));
         Task task = taskService.get(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
         comment.setAuthor(author);
         comment.setTask(task);

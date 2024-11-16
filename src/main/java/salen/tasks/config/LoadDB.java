@@ -29,7 +29,7 @@ public class LoadDB {
             taskService.save(new Task(1L, "test", "task for test", Status.WAITING, Priority.HIGH, userService.get(1L).get(), userService.get(2L).get()));
             Comment comment = new Comment();
             comment.setValue("test comment");
-            commentService.save(comment, 1L, 1L);
+            commentService.save(comment, "email@mail.com", 1L);
             userService.getAll().forEach((entity) -> log.info("preload... {}", entity));
         };
     }

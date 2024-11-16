@@ -18,4 +18,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long>, JpaSpec
     Page<Comment> findAllByTask_Id(Long taskId, Pageable pageable);
 
     void deleteByIdAndAuthor_idAndTask_Id(Long id, Long authorId, Long taskId);
+
+    void deleteByIdAndAuthor_EmailAndTask_Id(Long id, String authorEmail, Long taskId);
 }

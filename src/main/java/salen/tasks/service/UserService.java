@@ -6,9 +6,13 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import salen.tasks.entity.User;
+import salen.tasks.exception.UserNotFoundException;
 import salen.tasks.repository.UserRepository;
 
 import java.util.List;
@@ -18,7 +22,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository repository;
+    private final AuthenticationManager authManger;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+    private final JWTService jwtService;
 
     @Cacheable(value = "users", key = "#id")
     public Optional<User> get(Long id) {
@@ -31,6 +37,14 @@ public class UserService {
 
     public Optional<User> getByEmail(String email) {
         return repository.findByEmailAndIsActive(email, true);
+    }
+
+    public String verify(User user) {
+        Authentication authentication =
+                authManger.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+        if (!authentication.isAuthenticated())
+            throw new UserNotFoundException(user.getEmail());
+        return jwtService.generateToken(user.getEmail());
     }
 
     public List<User> getAll() {
