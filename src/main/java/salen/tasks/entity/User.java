@@ -1,8 +1,10 @@
 package salen.tasks.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Set;
 
@@ -10,11 +12,12 @@ import java.util.Set;
 @Data
 @Table(name = "users")
 @NoArgsConstructor
+@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue
     private Long id;
-
+    @Column(unique = true)
     private String email;
 
     private String password;
@@ -24,5 +27,5 @@ public class User {
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<Role> roles;
 
-
+    private boolean isActive = true;
 }

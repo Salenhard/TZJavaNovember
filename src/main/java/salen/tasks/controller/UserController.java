@@ -34,8 +34,12 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> save(@RequestBody @Valid UserDto dto) {
+        if (service.getByEmail(dto.getEmail()).isPresent())
+            throw new UserAlreadyExistsException(dto.getEmail());
+
         if (dto.getId() != null && service.get(dto.getId()).isPresent())
             throw new UserAlreadyExistsException(dto.getId());
+
         return ResponseEntity.ok().body(mapper.toDto(service.save(mapper.toEntity(dto))));
     }
 

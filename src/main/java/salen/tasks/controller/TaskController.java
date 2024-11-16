@@ -36,8 +36,9 @@ public class TaskController {
     public ResponseEntity<?> save(@RequestBody @Valid TaskDto dto) {
         if (dto.getId() != null && service.get(dto.getId()).isPresent())
             throw new TaskAlreadyExistsException(dto.getId());
+        Long userId = 1L;
         return ResponseEntity.ok()
-                .body(mapper.toDto(service.save(mapper.toEntity(dto), dto.getAuthorId(), dto.getExecutorId())));
+                .body(mapper.toDto(service.save(mapper.toEntity(dto), userId, dto.getExecutorId())));
     }
 
     @DeleteMapping("/{id}")
@@ -56,7 +57,8 @@ public class TaskController {
             newTask.setTitle(dto.getTitle());
             return newTask;
         }).orElseThrow(() -> new TaskNotFoundException(id));
+        Long userId = 1L;
         return ResponseEntity.ok()
-                .body(mapper.toDto(service.save(updatedTask, dto.getAuthorId(), dto.getExecutorId())));
+                .body(mapper.toDto(service.save(updatedTask, userId, dto.getExecutorId())));
     }
 }

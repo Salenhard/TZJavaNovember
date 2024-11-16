@@ -1,5 +1,7 @@
 package salen.tasks.entity.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -15,8 +17,12 @@ public class TaskDto {
     private String status;
     @NotBlank
     private String priority;
-    private Long authorId;
-    @NotNull
+    @JsonProperty("author")
+    private String authorEmail;
+    @JsonProperty("executor")
+    private String executorEmail;
+    @NotNull(message = "executor is mandatory")
+    @JsonProperty(value = "executorId", access = JsonProperty.Access.WRITE_ONLY)
     private Long executorId;
 
 }

@@ -2,6 +2,9 @@ package salen.tasks.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import salen.tasks.entity.Comment;
@@ -11,7 +14,7 @@ import salen.tasks.exception.CommentAlreadyExistsException;
 import salen.tasks.exception.CommentNotFoundException;
 import salen.tasks.service.CommentService;
 
-import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/tasks/{taskId}/comments")
@@ -21,40 +24,39 @@ public class CommentController {
     private final CommentMapper mapper;
 
     @GetMapping("/{id}")
-    public CommentDto get(@PathVariable Long id) {
-        //todo maybe by taskId?
-        return service.get(id).map(mapper::toDto).orElseThrow(() -> new CommentNotFoundException(id));
+    public CommentDto get(@PathVariable Long taskId, @PathVariable Long id) {
+        return service.get(id, taskId).map(mapper::toDto).orElseThrow(() -> new CommentNotFoundException(id));
     }
 
     @GetMapping
-    public List<CommentDto> getAll() {
-        //todo by taskId
-        return service.getAll().stream().map(mapper::toDto).toList();
+    public Page<CommentDto> getAll(@PathVariable Long taskId, @RequestParam(required = false) Optional<Integer> page, @RequestParam(required = false) Optional<Integer> size) {
+        Pageable pageable = PageRequest.of(page.orElse(1) - 1, page.orElse(10));
+        return service.getAll(taskId, pageable).map(mapper::toDto);
     }
 
     @PostMapping
     public ResponseEntity<?> save(@PathVariable Long taskId, @RequestBody @Valid CommentDto dto) {
-        if (dto.getId() != null && service.get(dto.getId()).isPresent())
+        if (dto.getId() != null && service.get(dto.getId(), taskId).isPresent())
             throw new CommentAlreadyExistsException(dto.getId());
-        Long loggedUserId = 1L; //todo get from session jwt token kekw
-        return ResponseEntity.ok().body(mapper.toDto(service.save(mapper.toEntity(dto), loggedUserId, dto.getTaskId())));
+        Long loggedUserId = 1L; //todo get from session
+        return ResponseEntity.ok().body(mapper.toDto(service.save(mapper.toEntity(dto), loggedUserId, taskId)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(Long id) {
-        Long loggedUserId = 1L; //todo get from session jwt token kekw
-        service.delete(id, loggedUserId);
+    public ResponseEntity<?> delete(@PathVariable Long taskId, @PathVariable Long id) {
+        Long loggedUserId = 1L; //todo get from session
+        service.delete(id, loggedUserId, taskId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
-    public CommentDto update(@PathVariable Long id, @RequestBody @Valid CommentDto dto) {
-        Comment updatedComment = service.get(id).map((comment) -> {
-                    comment.setValue(comment.getValue());
+    public CommentDto update(@PathVariable Long taskId, @PathVariable Long id, @RequestBody @Valid CommentDto dto) {
+        Comment updatedComment = service.get(id, taskId).map((comment) -> {
+                    comment.setValue(dto.getValue());
                     return comment;
                 }
         ).orElseThrow(() -> new CommentNotFoundException(id));
-
-        return mapper.toDto(service.save(updatedComment, dto.getAuthorId(), dto.getTaskId()));
+        Long userId = 1L;
+        return mapper.toDto(service.save(updatedComment, userId, taskId));
     }
 }

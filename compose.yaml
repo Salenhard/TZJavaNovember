@@ -1,10 +1,28 @@
 services:
-  mysql:
-    image: 'mysql:latest'
+  db:
+    image: mysql:latest
+    restart: always
     environment:
-      - 'MYSQL_DATABASE=mydatabase'
-      - 'MYSQL_PASSWORD=secret'
-      - 'MYSQL_ROOT_PASSWORD=verysecret'
-      - 'MYSQL_USER=myuser'
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
     ports:
+      - '3306:3306'
+    expose:
       - '3306'
+    volumes:
+      - my-db:/var/lib/mysql
+  tasks:
+    depends_on:
+      - db
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_URL=jdbc:mysql://db:3306/db
+volumes:
+  my-db:
