@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import salen.tasks.entity.Task;
 import salen.tasks.entity.User;
-import salen.tasks.exception.UserNotFoundException;
 import salen.tasks.repository.TaskRepository;
 
 import java.util.List;
@@ -38,9 +37,7 @@ public class TaskService {
 
     @CachePut(value = "tasks", key = "#task.id")
     @Transactional
-    public Task save(Task task, String authorEmail, Long executorId) {
-        User author = service.getByEmail(authorEmail).orElseThrow(() -> new UserNotFoundException(authorEmail));
-        User executor = service.get(executorId).orElseThrow(() -> new UserNotFoundException(executorId));
+    public Task save(Task task, User author, User executor) {
         task.setExecutor(executor);
         task.setAuthor(author);
         return repository.save(task);

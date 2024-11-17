@@ -1,5 +1,6 @@
 package salen.tasks.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import salen.tasks.entity.User;
@@ -12,5 +13,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmailAndIsActive(String email, boolean isActive);
 
-    List<User> findAllByIsActive(boolean isActive);
+    List<User> findAllByIsActive(boolean isActive, Pageable pageable);
 }

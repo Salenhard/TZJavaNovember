@@ -11,13 +11,10 @@ import java.util.Optional;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long>, JpaSpecificationExecutor<Comment> {
-    void deleteByIdAndAuthor_id(Long id, Long authorId);
 
     Optional<Comment> findByIdAndTask_Id(Long id, Long taskId);
 
     Page<Comment> findAllByTask_Id(Long taskId, Pageable pageable);
-
-    void deleteByIdAndAuthor_idAndTask_Id(Long id, Long authorId, Long taskId);
 
     void deleteByIdAndAuthor_EmailAndTask_Id(Long id, String authorEmail, Long taskId);
 }

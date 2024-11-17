@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,10 +30,6 @@ public class UserService {
         return repository.findById(id);
     }
 
-    public Page<User> getAll(Pageable pageable) {
-        return repository.findAll(pageable);
-    }
-
     public Optional<User> getByEmail(String email) {
         return repository.findByEmailAndIsActive(email, true);
     }
@@ -48,7 +43,11 @@ public class UserService {
     }
 
     public List<User> getAll() {
-        return repository.findAllByIsActive(true);
+        return repository.findAll();
+    }
+
+    public List<User> getAll(Pageable pageable) {
+        return repository.findAllByIsActive(true, pageable);
     }
 
     @CacheEvict(value = "users", key = "#id")

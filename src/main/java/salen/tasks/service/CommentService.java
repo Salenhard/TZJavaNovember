@@ -20,8 +20,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CommentService {
     private final CommentRepository repository;
-    private final UserService userService;
-    private final TaskService taskService;
 
     @Cacheable(value = "comments", key = "#id")
     public Optional<Comment> get(Long id, Long taskId) {
@@ -38,13 +36,10 @@ public class CommentService {
     }
 
     @CachePut(value = "comments", key = "#comment.id")
-    public Comment save(Comment comment, String authorEmail, Long taskId) {
-        User author = userService.getByEmail(authorEmail).orElseThrow(() -> new UserNotFoundException(authorEmail));
-        Task task = taskService.get(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
+    public Comment save(Comment comment, User author, Task task) {
         comment.setAuthor(author);
         comment.setTask(task);
         return repository.save(comment);
     }
-
 }
 

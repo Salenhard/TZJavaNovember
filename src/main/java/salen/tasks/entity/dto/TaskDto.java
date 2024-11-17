@@ -1,6 +1,5 @@
 package salen.tasks.entity.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -24,5 +23,4 @@ public class TaskDto {
     @NotNull(message = "executor is mandatory")
     @JsonProperty(value = "executorId", access = JsonProperty.Access.WRITE_ONLY)
     private Long executorId;
-
 }

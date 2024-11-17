@@ -2,7 +2,10 @@ package salen.tasks.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import salen.tasks.entity.Role;
 import salen.tasks.entity.User;
@@ -13,11 +16,13 @@ import salen.tasks.exception.UserNotFoundException;
 import salen.tasks.service.UserService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
+@Secured("ADMIN")
 public class UserController {
     private final UserService service;
     private final UserMapper mapper;
@@ -28,8 +33,9 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> getAll() {
-        return service.getAll().stream().map(mapper::toDto).toList();
+    public List<UserDto> getAll(@RequestParam(required = false) Optional<Integer> page, @RequestParam(required = false) Optional<Integer> size) {
+        Pageable pageable = PageRequest.of(page.orElse(1) - 1, page.orElse(5));
+        return service.getAll(pageable).stream().map(mapper::toDto).toList();
     }
 
     @PostMapping
