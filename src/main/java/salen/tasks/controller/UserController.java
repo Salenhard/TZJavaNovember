@@ -2,6 +2,7 @@ package salen.tasks.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,6 @@ import salen.tasks.exception.UserAlreadyExistsException;
 import salen.tasks.exception.UserNotFoundException;
 import salen.tasks.service.UserService;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -33,9 +33,10 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> getAll(@RequestParam(required = false) Optional<Integer> page, @RequestParam(required = false) Optional<Integer> size) {
-        Pageable pageable = PageRequest.of(page.orElse(1) - 1, page.orElse(5));
-        return service.getAll(pageable).stream().map(mapper::toDto).toList();
+    public Page<UserDto> getAll(@RequestParam(required = false) Optional<Integer> page,
+                                @RequestParam(required = false) Optional<Integer> size) {
+        Pageable pageable = PageRequest.of(page.orElse(1) - 1, size.orElse(5));
+        return service.getAll(pageable).map(mapper::toDto);
     }
 
     @PostMapping
@@ -56,7 +57,8 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody @Valid UserDto dto) {
+    public ResponseEntity<?> update(@PathVariable Long id,
+                                    @RequestBody @Valid UserDto dto) {
         User updatedUser = service.get(id).map((newUser) -> {
                     newUser.setEmail(dto.getEmail());
                     newUser.setPassword(dto.getPassword());

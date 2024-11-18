@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,15 +16,16 @@ import salen.tasks.entity.User;
 import salen.tasks.exception.UserNotFoundException;
 import salen.tasks.repository.UserRepository;
 
-import java.util.List;
 import java.util.Optional;
+
+import static salen.tasks.util.UserSpecification.isActive;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository repository;
     private final AuthenticationManager authManger;
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
     private final JWTService jwtService;
 
     @Cacheable(value = "users", key = "#id")
@@ -42,12 +45,10 @@ public class UserService {
         return jwtService.generateToken(user.getEmail());
     }
 
-    public List<User> getAll() {
-        return repository.findAll();
-    }
-
-    public List<User> getAll(Pageable pageable) {
-        return repository.findAllByIsActive(true, pageable);
+    public Page<User> getAll(Pageable pageable) {
+        boolean isActive = true;
+        Specification<User> filters = Specification.where(isActive(isActive));
+        return repository.findAll(filters, pageable);
     }
 
     @CacheEvict(value = "users", key = "#id")

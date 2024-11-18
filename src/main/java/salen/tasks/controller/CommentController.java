@@ -34,18 +34,24 @@ public class CommentController {
     private final TaskService taskService;
 
     @GetMapping("/{id}")
-    public CommentDto get(@PathVariable Long taskId, @PathVariable Long id) {
+    public CommentDto get(@PathVariable Long taskId,
+                          @PathVariable Long id) {
         return commentService.get(id, taskId).map(mapper::toDto).orElseThrow(() -> new CommentNotFoundException(id));
     }
 
     @GetMapping
-    public Page<CommentDto> getAll(@PathVariable Long taskId, @RequestParam(required = false) Optional<Integer> page, @RequestParam(required = false) Optional<Integer> size) {
+    public Page<CommentDto> getAll(@PathVariable Long taskId,
+                                   @RequestParam(required = false) Optional<Integer> page,
+                                   @RequestParam(required = false) Optional<Integer> size,
+                                   @RequestParam(required = false) String author) {
         Pageable pageable = PageRequest.of(page.orElse(1) - 1, size.orElse(10));
-        return commentService.getAll(taskId, pageable).map(mapper::toDto);
+        return commentService.getAll(taskId, author, pageable).map(mapper::toDto);
     }
 
     @PostMapping
-    public ResponseEntity<?> save(@PathVariable Long taskId, @RequestBody @Valid CommentDto dto, Principal principal) {
+    public ResponseEntity<?> save(@PathVariable Long taskId,
+                                  @RequestBody @Valid CommentDto dto,
+                                  Principal principal) {
         User user = userService.getByEmail(principal.getName()).get();
         Task task = taskService.get(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
 
@@ -61,7 +67,9 @@ public class CommentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long taskId, @PathVariable Long id, Principal principal) {
+    public ResponseEntity<?> delete(@PathVariable Long taskId,
+                                    @PathVariable Long id,
+                                    Principal principal) {
         User user = userService.getByEmail(principal.getName()).get();
         Task task = taskService.get(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
 

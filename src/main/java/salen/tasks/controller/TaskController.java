@@ -2,7 +2,11 @@ package salen.tasks.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import salen.tasks.entity.*;
@@ -15,7 +19,7 @@ import salen.tasks.service.TaskService;
 import salen.tasks.service.UserService;
 
 import java.security.Principal;
-import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/tasks")
@@ -31,13 +35,22 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<TaskDto> getAll() {
-        return taskService.getAll().stream().map(mapper::toDto).toList();
+    public Page<TaskDto> getAll(@RequestParam(required = false) Optional<Integer> page,
+                                @RequestParam(required = false) Optional<Integer> size,
+                                @RequestParam(required = false) String title,
+                                @RequestParam(required = false) String priority,
+                                @RequestParam(required = false) String status,
+                                @RequestParam(required = false) String author,
+                                @RequestParam(required = false) String executor
+    ) {
+        Pageable pageable = PageRequest.of(page.orElse(1) - 1, size.orElse(5));
+        return taskService.getAll(title, priority, status, author, executor, pageable).map(mapper::toDto);
     }
 
     @PostMapping
     @Secured("ADMIN")
-    public ResponseEntity<?> save(@RequestBody @Valid TaskDto dto, Principal principal) {
+    public ResponseEntity<?> save(@RequestBody @Valid TaskDto dto,
+                                  Principal principal) {
         User user = userService.getByEmail(principal.getName()).get();
         User executor = userService.get(dto.getExecutorId()).orElseThrow(() -> new UserNotFoundException(dto.getExecutorId()));
 
@@ -56,7 +69,9 @@ public class TaskController {
 
     @PutMapping("/{id}")
     @Secured({"ADMIN", "USER"})
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody @Valid TaskDto dto, Principal principal) {
+    public ResponseEntity<?> update(@PathVariable Long id,
+                                    @RequestBody @Valid TaskDto dto,
+                                    Principal principal) {
         User user = userService.getByEmail(principal.getName()).get();
         Task updatedTask = taskService.get(id).orElseThrow(() -> new TaskNotFoundException(id));
         User executor = userService.get(dto.getExecutorId()).orElseThrow(() -> new UserNotFoundException(dto.getExecutorId()));
@@ -69,7 +84,7 @@ public class TaskController {
             updatedTask.setExecutor(executor);
         } else if (updatedTask.getExecutor().getId().equals(user.getId()))
             updatedTask.setStatus(Status.valueOf(dto.getStatus()));
-
+        else throw new AccessDeniedException("Access denied");
         return ResponseEntity.ok().body(mapper.toDto(taskService.save(updatedTask, user, executor)));
     }
 }

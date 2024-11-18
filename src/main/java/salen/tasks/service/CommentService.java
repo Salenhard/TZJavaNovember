@@ -6,15 +6,18 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import salen.tasks.entity.Comment;
 import salen.tasks.entity.Task;
 import salen.tasks.entity.User;
-import salen.tasks.exception.TaskNotFoundException;
-import salen.tasks.exception.UserNotFoundException;
 import salen.tasks.repository.CommentRepository;
 
+import java.util.Objects;
 import java.util.Optional;
+
+import static salen.tasks.util.CommentSpecification.equalTaskId;
+import static salen.tasks.util.CommentSpecification.likeAuthor;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +29,10 @@ public class CommentService {
         return repository.findByIdAndTask_Id(id, taskId);
     }
 
-    public Page<Comment> getAll(Long taskId, Pageable pageable) {
-        return repository.findAllByTask_Id(taskId, pageable);
+    public Page<Comment> getAll(Long taskId, String author, Pageable pageable) {
+        Specification<Comment> filters = Specification.where(equalTaskId(taskId))
+                .and(Objects.isNull(author) ? null : likeAuthor(author));
+        return repository.findAll(filters, pageable);
     }
 
     @CacheEvict(value = "comments", key = "#id")
