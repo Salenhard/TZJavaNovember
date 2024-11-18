@@ -1,6 +1,7 @@
 FROM bellsoft/liberica-openjdk-alpine:21 AS builder
 WORKDIR /application
 COPY . .
+RUN sed -i 's/\r$//' mvnw
 RUN --mount=type=cache,target=/root/.m2  chmod +x mvnw && ./mvnw clean install -Dmaven.test.skip
 
 FROM bellsoft/liberica-openjre-alpine:21
