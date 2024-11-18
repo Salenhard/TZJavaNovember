@@ -1,13 +1,12 @@
 package salen.tasks.controller;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,11 +24,24 @@ public class TaskControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    public String getToken() throws Exception {
+        String username = "email@mail.com";
+        String password = "e@1234";
+        String body = "{\"email\":\"" + username + "\", \"password\":\"" + password + "\"}";
+
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/login")
+                .contentType("application/json")
+                .content(body)).andReturn();
+        String response = result.getResponse().getContentAsString();
+        response = response.replace("{\"access_token\": \"", "");
+
+        return response.replace("\"}", "");
+    }
+
     @Test
     public void getTaskIsOkTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/tasks/1")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("user")))
+                        .header("Authorization", "Bearer " + getToken()))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -37,8 +49,7 @@ public class TaskControllerTest {
     @Test
     public void getAllTasksIsOkTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/tasks")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("user")))
+                        .header("Authorization", "Bearer " + getToken()))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -57,8 +68,7 @@ public class TaskControllerTest {
                 }""";
 
         mockMvc.perform(post("/api/v1/tasks")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("user"))
+                        .header("Authorization", "Bearer " + getToken())
                         .content(dto)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -68,8 +78,7 @@ public class TaskControllerTest {
     @Test
     public void deleteNoContentTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/tasks/{0}", "0")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("user")))
+                        .header("Authorization", "Bearer " + getToken()))
                 .andExpect(status().isNoContent())
                 .andDo(print());
     }
@@ -86,8 +95,7 @@ public class TaskControllerTest {
                 }""";
 
         mockMvc.perform(put("/api/v1/tasks/100")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("user"))
+                        .header("Authorization", "Bearer " + getToken())
                         .content(dto)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())

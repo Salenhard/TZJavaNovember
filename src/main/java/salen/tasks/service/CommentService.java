@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import salen.tasks.entity.Comment;
 import salen.tasks.entity.Task;
 import salen.tasks.entity.User;
@@ -36,11 +37,13 @@ public class CommentService {
     }
 
     @CacheEvict(value = "comments", key = "#id")
+    @Transactional
     public void delete(Long id, String authorEmail, Long taskId) {
         repository.deleteByIdAndAuthor_EmailAndTask_Id(id, authorEmail, taskId);
     }
 
     @CachePut(value = "comments", key = "#comment.id")
+    @Transactional
     public Comment save(Comment comment, User author, Task task) {
         comment.setAuthor(author);
         comment.setTask(task);

@@ -1,17 +1,14 @@
 package salen.tasks.controller;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import salen.tasks.config.SecurityConfig;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -28,11 +25,24 @@ public class CommentControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    public String getToken() throws Exception {
+        String username = "email@mail.com";
+        String password = "e@1234";
+        String body = "{\"email\":\"" + username + "\", \"password\":\"" + password + "\"}";
+
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/login")
+                .contentType("application/json")
+                .content(body)).andReturn();
+        String response = result.getResponse().getContentAsString();
+        response = response.replace("{\"access_token\": \"", "");
+
+        return response.replace("\"}", "");
+    }
+
     @Test
     public void getCommentTaskOkTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/tasks/1/comments/1")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("user")))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/tasks/1/comments/2")
+                        .header("Authorization", "Bearer " + getToken()))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -40,8 +50,7 @@ public class CommentControllerTest {
     @Test
     public void getAllCommentOkTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/tasks/1/comments")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("user")))
+                        .header("Authorization", "Bearer " + getToken()))
                 .andExpect(status().isOk())
                 .andDo(print());
     }
@@ -54,8 +63,7 @@ public class CommentControllerTest {
                 }""";
 
         mockMvc.perform(post("/api/v1/tasks/100/comments")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("user"))
+                        .header("Authorization", "Bearer " + getToken())
                         .content(dto)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -65,8 +73,7 @@ public class CommentControllerTest {
     @Test
     public void deleteNoContentTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/tasks/1/comments/1")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("user")))
+                        .header("Authorization", "Bearer " + getToken()))
                 .andExpect(status().isNoContent())
                 .andDo(print());
     }
@@ -80,8 +87,7 @@ public class CommentControllerTest {
                 }""";
 
         mockMvc.perform(put("/api/v1/tasks/100/comments/1")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("user"))
+                        .header("Authorization", "Bearer " + getToken())
                         .content(dto)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())

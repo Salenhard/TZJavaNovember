@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import salen.tasks.entity.User;
 import salen.tasks.exception.UserNotFoundException;
 import salen.tasks.repository.UserRepository;
@@ -52,6 +53,7 @@ public class UserService {
     }
 
     @CacheEvict(value = "users", key = "#id")
+    @Transactional
     public void delete(Long id) {
         Optional<User> byId = repository.findById(id);
         byId.ifPresent(user -> {
@@ -61,6 +63,7 @@ public class UserService {
     }
 
     @CachePut(value = "users", key = "#user.id")
+    @Transactional
     public User save(User user) {
         user.setPassword(encoder.encode(user.getPassword()));
         return repository.save(user);
