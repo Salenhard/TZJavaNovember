@@ -63,7 +63,7 @@ public class CommentService {
         Task task = taskService.get(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
 
         if (comment.getId() != null && repository.findByIdAndTask_Id(comment.getId(), taskId).isPresent())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment with id:%d not found".formatted(comment.getId()));
+            throw new CommentNotFoundException(comment.getId());
 
         if (!user.getRoles().contains(Role.ADMIN) && !user.getId().equals(task.getExecutor().getId()))
             throw new AccessDeniedException("Access denied");
