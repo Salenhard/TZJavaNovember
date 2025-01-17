@@ -85,6 +85,7 @@ public class TaskController {
         } else if (updatedTask.getExecutor().getId().equals(user.getId()))
             updatedTask.setStatus(Status.valueOf(dto.getStatus()));
         else throw new AccessDeniedException("Access denied");
+
         return ResponseEntity.ok().body(mapper.toDto(taskService.save(updatedTask, user, executor)));
     }
 }

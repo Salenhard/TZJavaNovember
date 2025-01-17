@@ -32,17 +32,17 @@ public class LoadDB {
             taskService.save(task);
             Comment comment = new Comment();
             comment.setValue("test comment");
-            commentService.save(comment, user, task);
+            commentService.save(comment, "email@mail.com", 1L);
             comment.setId(2L);
-            commentService.save(comment, user1, task);
+            commentService.save(comment, "email@mail.com", 1L);
             comment.setId(3L);
-            commentService.save(comment, user1, task);
+            commentService.save(comment, "email@mail.com", 1L);
             comment.setId(4L);
-            commentService.save(comment, user, task);
+            commentService.save(comment, "email@mail.com", 1L);
             comment.setId(5L);
-            commentService.save(comment, user, task);
+            commentService.save(comment, "email@mail.com", 1L);
             comment.setId(6L);
-            commentService.save(comment, user, task);
+            commentService.save(comment, "email@mail.com", 1L);
         };
     }
 }

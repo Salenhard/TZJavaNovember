@@ -8,7 +8,6 @@ import salen.tasks.entity.dto.CommentDto;
 @Mapper(componentModel = "spring", uses = {UserMapper.class, TaskMapper.class})
 public interface CommentMapper extends DefaultMapper<CommentDto, Comment> {
 
-
     @Override
     @Mapping(target = "authorName", expression = "java(entity.getAuthor().getEmail())")
     CommentDto toDto(Comment entity);

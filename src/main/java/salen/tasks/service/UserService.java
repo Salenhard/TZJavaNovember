@@ -55,8 +55,7 @@ public class UserService {
     @CacheEvict(value = "users", key = "#id")
     @Transactional
     public void delete(Long id) {
-        Optional<User> byId = repository.findById(id);
-        byId.ifPresent(user -> {
+        repository.findById(id).ifPresent(user -> {
             user.setActive(false);
             repository.save(user);
         });
